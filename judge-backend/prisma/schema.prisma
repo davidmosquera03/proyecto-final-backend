@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  password  String
+  role      String  // 'ADMIN' | 'STUDENT'
+}
+
+model Challenge {
+  id          String     @id @default(uuid())
+  title       String
+  description String     @db.Text
+  difficulty  Difficulty
+  tags        String[]
+  timeLimit   Int        // milisegundos
+  memoryLimit Int        // MB
+  status      Status     @default(DRAFT)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
