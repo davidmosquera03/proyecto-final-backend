@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
@@ -8,23 +9,79 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  email     String  @unique
-  password  String
-  role      String  // 'ADMIN' | 'STUDENT'
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  role         String        // 'ADMIN' | 'STUDENT'
+  submissions  Submission[]
+  leaderboards Leaderboard[]
 }
 
 model Challenge {
-  id          String     @id @default(uuid())
+  id          String       @id @default(uuid())
   title       String
-  description String     @db.Text
+  description String       @db.Text
   difficulty  Difficulty
   tags        String[]
-  timeLimit   Int        // milisegundos
-  memoryLimit Int        // MB
-  status      Status     @default(DRAFT)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  timeLimit   Int          // milisegundos
+  memoryLimit Int          // MB
+  status      Status       @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  testCases   TestCase[]
+  submissions Submission[]
+}
+
+model TestCase {
+  id          String    @id @default(uuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  input       String    @db.Text
+  output      String    @db.Text
+  isHidden    Boolean   @default(false) // Si es visible para el estudiante
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([challengeId])
+}
+
+model Submission {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  code        String           @db.Text
+  language    Language
+  status      SubmissionStatus @default(PENDING)
+  score       Float            @default(0) // Puntuación obtenida
+  executionTime Int?           // milisegundos
+  memoryUsed  Int?             // MB
+  errorMessage String?         @db.Text
+  testsPassed Int              @default(0)
+  testsTotal  Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([challengeId])
+  @@index([status])
+}
+
+model Leaderboard {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String?  // Null para leaderboard global
+  score       Float    @default(0)
+  submissions Int      @default(0)
+  lastSubmit  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, challengeId])
+  @@index([challengeId])
+  @@index([score])
 }
 
 enum Difficulty {
@@ -37,4 +94,23 @@ enum Status {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+enum Language {
+  PYTHON
+  JAVASCRIPT
+  TYPESCRIPT
+  JAVA
+  CPP
+}
+
+enum SubmissionStatus {
+  PENDING
+  RUNNING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
 }
