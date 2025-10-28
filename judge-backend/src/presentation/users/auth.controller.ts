@@ -1,7 +1,7 @@
-import { Controller, Post, Body, HttpCode, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get, UseGuards, Req, Inject } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '../../auth/auth.service';
-import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
+import { IUserRepository } from 'src/domain/users/user.repository.port';
 import { RegisterUseCase } from '../../application/use-cases/register.usecase';
 import { LoginUseCase } from '../../application/use-cases/login.usecase';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -17,7 +17,7 @@ export class AuthController {
 
   constructor(
     private authService: AuthService,
-    private userRepo: PrismaUserRepository,
+    @Inject('IUserRepository') private userRepo: IUserRepository,
   ) {
     this.registerUC = new RegisterUseCase(this.userRepo);
     this.loginUC = new LoginUseCase(this.userRepo);

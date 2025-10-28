@@ -22,7 +22,12 @@ import { JwtStrategy } from '../../auth/strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, PrismaUserRepository, JwtStrategy],
-  exports: [AuthService, PrismaUserRepository],
+  providers: [
+    AuthService,
+    PrismaService,
+    JwtStrategy,
+    { provide: 'IUserRepository', useClass: PrismaUserRepository },
+  ],
+  exports: [AuthService, 'IUserRepository', PassportModule, JwtModule],
 })
 export class UsersModule {}

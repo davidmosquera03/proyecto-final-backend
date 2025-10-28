@@ -1,25 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-jwt';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(config: ConfigService) {
-    const secret = config.get<string>('JWT_ACCESS_SECRET') || process.env.JWT_ACCESS_SECRET || 'default_jwt_secret';
-    if (!secret || secret === 'default_jwt_secret') {
-      // In non-production this fallback is acceptable; in production prefer to throw so secret is provided
-      // We still pass a secret to avoid passport-jwt throwing "requires a secret or key"
-    }
-
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: secret,
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET') || process.env.JWT_ACCESS_SECRET || configService.get<string>('JWT_SECRET') || process.env.JWT_SECRET || 'default_jwt_secret',
     });
   }
 
   async validate(payload: any) {
-    // payload.sub === userId
-    return { userId: payload.sub, email: payload.email };
+    // payload expected: { sub: userId, email, role }
+    // Puede retornarse el payload o buscar usuario real:
+    const user = await this.authService.validateUserFromJwtPayload(payload);
+    // Si no hay método, retornar payload como fallback:
+    return user ?? payload;
   }
 }
