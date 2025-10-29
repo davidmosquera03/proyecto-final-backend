@@ -33,6 +33,7 @@ export class ChallengesController {
 
   @Get(':id')
   @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   async get(@Param('id') id: string) {
     const challenge = await this.getChallenge.execute(id);
     if (!challenge) return { message: 'Challenge not found' };
@@ -41,6 +42,7 @@ export class ChallengesController {
 
   @Get()
   @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   async list() {
     const challenges = await this.listChallenges.execute();
     return challenges.map(toChallengeDto);
