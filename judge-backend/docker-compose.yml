@@ -15,7 +15,6 @@ services:
       REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: 6379
-    command: npm run start:dev
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -62,11 +61,11 @@ services:
       REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: 6379
-    command: npm run start:worker
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     working_dir: /usr/src/app
+    command: sh -c "npx prisma migrate deploy && npm run start:worker"
     networks:
       - judge_network
 
