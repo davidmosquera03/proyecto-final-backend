@@ -1,21 +1,16 @@
 import { Controller, Post, Get, Body, Param, Query } from '@nestjs/common';
-import { SubmissionService } from './submission.service';
-import { Language } from './submission.entity';
+import { CreateSubmissionDto, SubmissionService } from './submission.service';
+import { Language } from '../domain/submissions/submission.entity';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('submissions')
 @Controller('submissions')
 export class SubmissionController {
   constructor(private readonly submissionService: SubmissionService) {}
 
   @Post()
-  async addSubmission(
-    @Body()
-    body: {
-      code: string;
-      language: Language;
-      userId: string;
-      challengeId: string;
-    },
-  ) {
+  @ApiBody({ type: CreateSubmissionDto }) // 👈 add this line
+  async addSubmission(@Body() body: CreateSubmissionDto) {
     return this.submissionService.addJob(body);
   }
 

@@ -2,12 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '../infrastructure/prisma.service';
-import { Language } from './submission.entity';
+import { Language } from '../domain/submissions/submission.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
-interface CreateSubmissionDto {
+export class CreateSubmissionDto {
+  @ApiProperty({ example: "print('Hello')" })
   code: string;
+
+  @ApiProperty({ enum: ['PYTHON', 'JAVASCRIPT', 'TYPESCRIPT', 'JAVA', 'CPP'], example: 'PYTHON' })
   language: Language;
+
+  @ApiProperty({ example: '649980e1-8f3a-4224-a379-bc9d413ccb06' })
   userId: string;
+
+  @ApiProperty({ example: 'b0caa2a4-112e-4424-89f3-9ea23366d08e' })
   challengeId: string;
 }
 

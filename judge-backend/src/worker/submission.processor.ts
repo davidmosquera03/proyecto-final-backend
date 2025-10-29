@@ -2,7 +2,7 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../infrastructure/prisma.service';
-import { SubmissionStatus, Language } from '../submissions/submission.entity';
+import { SubmissionStatus, Language } from '../domain/submissions/submission.entity';
 
 interface SubmissionJob {
   submissionId: string;
