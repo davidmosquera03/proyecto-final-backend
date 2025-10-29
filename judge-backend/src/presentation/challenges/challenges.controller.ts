@@ -11,6 +11,8 @@ import { GetChallengeUseCase } from "src/application/challenges/usecases/get-cha
 import { ListChallengeUseCase } from "src/application/challenges/usecases/list-challenge.usecase";
 import { UpdateChallengeUsecase } from 'src/application/challenges/usecases/update.challenge.usecase';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { AdminGuard } from '../guards/role.guard';
+
 
 @ApiTags('challenges')
 @Controller('challenges')
@@ -25,7 +27,7 @@ export class ChallengesController {
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async create(@Body() body: CreateChallengeDto) {
     const challenge = await this.createChallenge.execute(body);
     return toChallengeDto(challenge);
@@ -50,7 +52,7 @@ export class ChallengesController {
 
   @Put(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async update(@Param('id') id: string, @Body() body: UpdateChallengeDto) {
     const challenge = await this.updateChallenge.execute(id, body);
     if (!challenge) return { message: 'Challenge not found' };
@@ -59,7 +61,7 @@ export class ChallengesController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async delete(@Param('id') id: string) {
     const deleted = await this.deleteChallenge.execute(id);
     return { success: deleted, message: deleted ? 'Deleted' : 'Not found' };

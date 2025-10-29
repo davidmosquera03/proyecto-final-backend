@@ -1,5 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -10,5 +11,18 @@ export class RoleGuard implements CanActivate {
     if (!requiredRoles) return true;
     const { user } = ctx.switchToHttp().getRequest();
     return requiredRoles.includes(user.role);
+  }
+}
+@Injectable()
+export class AdminGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    const req = context.switchToHttp().getRequest();
+    const user = req.user;
+    // Si no hay usuario, permitir que JwtAuthGuard haya fallado antes
+    if (!user) return false;
+    if (user.role !== 'ADMIN') {
+      throw new ForbiddenException('Admin role required');
+    }
+    return true;
   }
 }
