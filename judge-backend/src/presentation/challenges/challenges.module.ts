@@ -8,9 +8,11 @@ import { PrismaService } from "src/infrastructure/prisma.service";
 import { PrismaChallengeRepository } from "src/infrastructure/repositories/prisma-challenge.repository";
 import { ChallengesController } from "./challenges.controller";
 import { Module } from '@nestjs/common';
+import { UsersModule } from 'src/presentation/users/users.module';
 const usePrisma = !!process.env.DATABASE_URL;
 
 @Module({
+  imports: [UsersModule],
   controllers: [ChallengesController],
   providers: [
     ...(usePrisma ? [PrismaService] : []),
