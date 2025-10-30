@@ -18,3 +18,7 @@ docker-compose up -d db
 npx prisma migrate dev
 npm run start:dev
 ```
+
+```
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt passport-local bcrypt
+```
