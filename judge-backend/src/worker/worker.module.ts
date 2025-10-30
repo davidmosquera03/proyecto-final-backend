@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SubmissionService } from './submissions/submission.service';
-import { SubmissionController } from './submissions/submission.controller';
-import { PrismaService } from './infrastructure/prisma.service';
-import { ChallengesHttpModule } from './presentation/challenges/challenges.module';
+import { SubmissionProcessor } from './submission.processor';
+import { PrismaService } from '../infrastructure/prisma.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -29,7 +26,6 @@ import { ChallengesHttpModule } from './presentation/challenges/challenges.modul
       },
       inject: [ConfigService],
     }),
-
     BullModule.registerQueue({
       name: 'submissions',
       defaultJobOptions: {
@@ -47,11 +43,7 @@ import { ChallengesHttpModule } from './presentation/challenges/challenges.modul
         },
       },
     }),
-
-    ChallengesHttpModule,
   ],
-  controllers: [SubmissionController],
-  providers: [SubmissionService, PrismaService],
-  exports: [PrismaService],
+  providers: [SubmissionProcessor, PrismaService],
 })
-export class AppModule {}
+export class WorkerModule {}

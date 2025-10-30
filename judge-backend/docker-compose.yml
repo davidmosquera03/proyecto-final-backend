@@ -1,8 +1,10 @@
 version: "3.9"
+
 services:
   api:
     build: .
     container_name: judge-api
+    restart: always
     ports:
       - "3000:3000"
     depends_on:
@@ -11,10 +13,18 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/judge
       REDIS_URL: redis://redis:6379
-    command: npm run start:dev
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
+    networks:
+      - judge_network
 
   db:
     image: postgres:15
+    container_name: judge-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -24,11 +34,45 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    container_name: judge-redis
+    restart: always
     ports:
       - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - judge_network
+
+  worker:
+    build: .
+    container_name: judge-worker
+    restart: always
+    depends_on:
+      - redis
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/judge
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
+    command: sh -c "npx prisma migrate deploy && npm run start:worker"
+    networks:
+      - judge_network
 
 volumes:
   postgres_data:
+  redis_data:
+
+networks:
+  judge_network:
+    driver: bridge
