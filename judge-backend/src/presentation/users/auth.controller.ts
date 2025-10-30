@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, Get, UseGuards, Req, Inject } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get, UseGuards, Req, Inject , UnauthorizedException,} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '../../auth/auth.service';
 import { IUserRepository } from 'src/domain/users/user.repository.port';
@@ -36,11 +36,15 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Iniciar sesión y obtener un token JWT' })
   @ApiResponse({ status: 200, type: AuthResponseDto })
-  async login(@Body() body: LoginDto) {
+ async login(@Body() body: LoginDto) {
+  try {
     const user = await this.loginUC.execute(body.email, body.password);
     const accessToken = await this.authService.generateAccessToken(user.id, user.email, user.role);
     return { id: user.id, email: user.email, role: user.role, accessToken };
+  } catch (error) {
+    throw new UnauthorizedException('Invalid credentials');
   }
+}
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

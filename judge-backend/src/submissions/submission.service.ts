@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '../infrastructure/prisma.service';
@@ -62,7 +62,15 @@ export class SubmissionService {
       };
     } catch (error) {
       this.logger.error('Error creando submission o agregando job:', error);
-      throw error;
+
+  throw new HttpException(
+    {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      error: 'Error al crear la submission o agregarla a la cola',
+      details: error.message,
+    },
+    HttpStatus.INTERNAL_SERVER_ERROR,
+  );
     }
   }
 
