@@ -21,6 +21,7 @@
     "start:worker": "ts-node -r tsconfig-paths/register src/worker/worker.ts"
   },
   "dependencies": {
+    "@google/genai": "^1.28.0",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
