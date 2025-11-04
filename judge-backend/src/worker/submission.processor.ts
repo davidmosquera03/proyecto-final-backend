@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../infrastructure/prisma.service';
 import { SubmissionStatus, Language } from '../domain/submissions/submission.entity';
+import { RunnerService } from 'src/runners/runner.service';
 
 interface SubmissionJob {
   submissionId: string;
@@ -17,55 +18,38 @@ interface SubmissionJob {
 export class SubmissionProcessor extends WorkerHost {
   private readonly logger = new Logger(SubmissionProcessor.name);
 
-  constructor(private readonly prisma: PrismaService) {
-    super();
-  }
+ constructor(
+  private readonly prisma: PrismaService,
+  private readonly runner: RunnerService,
+ ) {
+  super();
+ }
 
   async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: string }> {
-    const { submissionId, code, language, userId, challengeId } = job.data;
-    
-    this.logger.log(`Procesando submission ${submissionId} (Job ${job.id})...`);
+  const { submissionId, code, language } = job.data;
+  this.logger.log(`Running submission ${submissionId}...`);
 
-    try {
-      await this.prisma.submission.update({
-        where: { id: submissionId },
-        data: { status: 'RUNNING' },
-      });
+  await this.prisma.submission.update({
+    where: { id: submissionId },
+    data: { status: 'RUNNING' },
+  });
 
-      await this.simulateCodeExecution(submissionId, challengeId);
+  const { output } = await this.runner.runCode(language, code);
 
-      await this.prisma.submission.update({
-        where: { id: submissionId },
-        data: {
-          status: 'ACCEPTED',
-          score: 100,
-          testsPassed: 1,
-          testsTotal: 1,
-        },
-      });
+  this.logger.log(`Output for submission ${submissionId}:\n${output}`);
 
-      this.logger.log(`Submission ${submissionId} procesada exitosamente`);
-      return { result: 'OK', submissionId };
-    } catch (error) {
-      this.logger.error(`Error procesando submission ${submissionId}:`, error);
-      
-      await this.prisma.submission.update({
-        where: { id: submissionId },
-        data: {
-          status: 'RUNTIME_ERROR',
-          errorMessage: error instanceof Error ? error.message : 'Error desconocido',
-        },
-      }).catch((updateError) => {
-        this.logger.error(`Error actualizando submission ${submissionId}:`, updateError);
-      });
+  await this.prisma.submission.update({
+    where: { id: submissionId },
+    data: {
+      status: 'ACCEPTED', // placeholder, later depends on test results
+      score: 100,
+      testsPassed: 1,
+      testsTotal: 1,
+    },
+  });
 
-      throw error;
-    }
-  }
-
-  private async simulateCodeExecution(submissionId: string, challengeId: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
+  return { result: 'OK', submissionId };
+}
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job) {
