@@ -1,0 +1,232 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Minimal auth styles */
+.auth-container {
+  --card-bg: var(--card-bg, #fff);
+  --card-border: var(--card-border, #eee);
+  max-width: 420px;
+  margin: 3rem auto;
+  text-align: left;
+  border: 1px solid var(--card-border);
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: var(--card-bg);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.auth-form label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+}
+.auth-form input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text);
+  border-radius: 4px;
+}
+.auth-form input::placeholder { color: var(--placeholder); }
+.auth-form button {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.auth-form button:hover { filter: brightness(0.95); }
+.auth-error {
+  color: #e77;
+  margin-top: 0.5rem;
+}
+.auth-hint { color: var(--text-muted); margin-top: 1rem }
+.dashboard { max-width: 760px; margin: 3rem auto; text-align: left }
+
+/* Theme variables: default (light) and dark overrides */
+:root {
+  --bg: #f6f7fb;
+  --text: #222;
+  --text-muted: #444;
+  --card-bg: #fff;
+  --card-border: #eee;
+  --input-bg: #fff;
+  --input-border: #ddd;
+  --placeholder: #888;
+  --button-bg: #111;
+  --button-text: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --text: #e6eef8;
+    --text-muted: #c3c8d3;
+    --card-bg: #121417;
+    --card-border: #23262a;
+    --input-bg: #0f1114;
+    --input-border: #2a2d31;
+    --placeholder: #8c9199;
+    --button-bg: #1f6feb;
+    --button-text: #fff;
+  }
+}
+
+/* Apply root-level background/text so entire app follows theme */
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Header styles */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(6px);
+}
+.app-header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  box-sizing: border-box;
+  height: 64px;
+}
+.site-title .site-link {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.header-user {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.logout-button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(31,111,235,0.12);
+}
+.logout-button:hover { filter: brightness(0.95); }
+
+/* add top padding to body so content isn't hidden under fixed header */
+body {
+  padding-top: 64px;
+}
+
+/* Teacher dashboard and tests cards */
+.tests-section { margin-top: 1.5rem }
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.test-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.test-card:focus, .test-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.06); }
+.card-left { text-align: left; max-width: calc(100% - 40px); }
+.prueba-name { font-weight: 700; margin-bottom: 0.25rem }
+.test-list { color: var(--text-muted); font-size: 0.9rem }
+.muted { color: var(--text-muted); }
+.card-right { color: var(--text-muted); display:flex; align-items:center; justify-content:center; min-width: 36px }
+
+.create-card { display:flex; align-items:center; justify-content:center; padding: 1.25rem; text-align:center }
+.create-content { display:flex; flex-direction:column; gap:0.5rem; align-items:center }
+.create-button {
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+}
+.create-button:hover { filter: brightness(0.95) }
+
+/* Action card for student view (Ver calificaciones) */
+.action-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  margin-bottom: 1rem;
+}
+.action-content { text-align: left }
+
