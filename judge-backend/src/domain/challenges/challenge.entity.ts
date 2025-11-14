@@ -12,6 +12,7 @@ export class Challenge {
     public timeLimit: number,
     public memoryLimit: number,
     public status: Status,
+    public courseId: string,
     public createdAt: Date,
     public updatedAt: Date
   ) {}

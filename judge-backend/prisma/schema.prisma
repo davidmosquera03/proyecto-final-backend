@@ -15,6 +15,31 @@ model User {
   role         String        // 'ADMIN' | 'STUDENT'
   submissions  Submission[]
   leaderboards Leaderboard[]
+  courses      CourseEnrollment[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  name        String
+  description String?      @db.Text
+  code        String       @unique // Código único del curso (ej: "CS101")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  challenges  Challenge[]
+  enrollments CourseEnrollment[]
+}
+
+model CourseEnrollment {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
 }
 
 model Challenge {
@@ -26,10 +51,14 @@ model Challenge {
   timeLimit   Int          // milisegundos
   memoryLimit Int          // MB
   status      Status       @default(DRAFT)
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   testCases   TestCase[]
   submissions Submission[]
+
+  @@index([courseId])
 }
 
 model TestCase {
