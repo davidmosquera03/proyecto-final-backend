@@ -85,7 +85,7 @@
   margin-top: 0.5rem;
 }
 .auth-hint { color: var(--text-muted); margin-top: 1rem }
-.dashboard { max-width: 760px; margin: 3rem auto; text-align: left }
+.dashboard { width: 1200px; margin: 3rem auto; text-align: left }
 
 /* Theme variables: default (light) and dark overrides */
 :root {
@@ -176,7 +176,32 @@ body {
 }
 
 /* Teacher dashboard and tests cards */
-.tests-section { margin-top: 1.5rem }
+.actions-section {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--card-border);
+}
+.actions-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.tests-section {
+  margin-top: 1.5rem;
+}
+.tests-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
 .tests-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -230,3 +255,16 @@ body {
 }
 .action-content { text-align: left }
 
+/* Responsive design */
+@media (max-width: 700px) {
+  .dashboard {
+    width: 100%;
+    padding: 0 1rem;
+    margin: 1.5rem auto;
+  }
+
+  .actions-grid,
+  .tests-grid {
+    grid-template-columns: 1fr;
+  }
+}

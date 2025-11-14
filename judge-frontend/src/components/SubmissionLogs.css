@@ -1,0 +1,448 @@
+/**
+ * Estilos para el componente de Logs Estructurados
+ */
+
+:root {
+  /* Colores específicos para SubmissionLogs */
+  --logs-bg: #f8f9fa;
+  --logs-border: #e5e7eb;
+  --logs-text-primary: #1f2937;
+  --logs-text-secondary: #6b7280;
+  --logs-card-bg: #ffffff;
+  --logs-card-hover: #f3f4f6;
+  --logs-json-bg: #1f2937;
+  --logs-json-text: #ecf0f1;
+  --logs-json-scrollbar: #6b7280;
+  --logs-event-bg: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --logs-bg: #0f1115;
+    --logs-border: #23262a;
+    --logs-text-primary: #e6eef8;
+    --logs-text-secondary: #8c9199;
+    --logs-card-bg: #121417;
+    --logs-card-hover: #1c1f23;
+    --logs-json-bg: #0d1117;
+    --logs-json-text: #c9d1d9;
+    --logs-json-scrollbar: #3b434b;
+    --logs-event-bg: #0d1117;
+  }
+}
+
+.submission-logs-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--logs-bg) 0%, var(--logs-bg) 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .submission-logs-container {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.logs-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--logs-border);
+  padding-bottom: 15px;
+}
+
+.logs-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: var(--logs-text-primary);
+  font-weight: 600;
+}
+
+.logs-header .subtitle {
+  margin: 0;
+  color: var(--logs-text-secondary);
+  font-size: 14px;
+}
+
+.logs-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+/* Estilos para la lista de submissions */
+.submissions-list {
+  background: var(--logs-card-bg);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .submissions-list {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.submissions-list h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: var(--logs-text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--logs-border);
+  padding-bottom: 10px;
+}
+
+.submissions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.submissions-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.submissions-grid::-webkit-scrollbar-track {
+  background: var(--logs-event-bg);
+  border-radius: 3px;
+}
+
+.submissions-grid::-webkit-scrollbar-thumb {
+  background: var(--logs-border);
+  border-radius: 3px;
+}
+
+.submissions-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--logs-text-secondary);
+}
+
+.submission-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: var(--logs-event-bg);
+  border: 2px solid var(--logs-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submission-card:hover {
+  border-color: #3b82f6;
+  background: var(--logs-card-hover);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+}
+
+.submission-card.selected {
+  border-color: #3b82f6;
+  background: var(--logs-card-hover);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .submission-card.selected {
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.card-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 8px;
+  border-radius: 6px;
+  gap: 4px;
+}
+
+.status-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.status-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.submission-id {
+  font-weight: 600;
+  color: var(--logs-text-primary);
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+}
+
+.challenge-name {
+  font-size: 13px;
+  color: var(--logs-text-primary);
+  font-weight: 500;
+}
+
+.submission-meta {
+  font-size: 12px;
+  color: var(--logs-text-secondary);
+}
+
+.submission-time {
+  font-size: 11px;
+  color: var(--logs-text-secondary);
+  opacity: 0.7;
+}
+
+/* Estilos para los detalles de submission */
+.submission-details {
+  background: var(--logs-card-bg);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .submission-details {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.submission-details h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: var(--logs-text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--logs-border);
+  padding-bottom: 10px;
+}
+
+.submission-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--logs-event-bg);
+  border-radius: 8px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item .label {
+  font-size: 12px;
+  color: var(--logs-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.summary-item .value {
+  font-size: 13px;
+  color: var(--logs-text-primary);
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.events-log {
+  margin-top: 20px;
+}
+
+.events-log h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: var(--logs-text-primary);
+  font-weight: 600;
+}
+
+.events-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-item {
+  background: var(--logs-event-bg);
+  border: 1px solid var(--logs-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.event-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--logs-text-primary);
+}
+
+.event-header:hover {
+  background-color: var(--logs-card-hover);
+}
+
+.event-level {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-width: 50px;
+  text-align: center;
+}
+
+.event-message {
+  font-size: 13px;
+  color: var(--logs-text-primary);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.event-time {
+  font-size: 11px;
+  color: var(--logs-text-secondary);
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+}
+
+.expand-icon {
+  font-size: 12px;
+  color: var(--logs-text-secondary);
+  transition: transform 0.2s ease;
+  min-width: 16px;
+  text-align: center;
+}
+
+.event-item:has(.expand-icon:hover) {
+  background-color: var(--logs-card-hover);
+}
+
+.event-details {
+  padding: 0 12px 12px 12px;
+  border-top: 1px solid var(--logs-border);
+  background: var(--logs-event-bg);
+}
+
+.json-display {
+  margin: 0;
+  padding: 12px;
+  background: var(--logs-json-bg);
+  color: var(--logs-json-text);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+  max-height: 300px;
+  line-height: 1.4;
+}
+
+.json-display::-webkit-scrollbar {
+  height: 6px;
+}
+
+.json-display::-webkit-scrollbar-track {
+  background: var(--logs-event-bg);
+}
+
+.json-display::-webkit-scrollbar-thumb {
+  background: var(--logs-json-scrollbar);
+  border-radius: 3px;
+}
+
+.json-display::-webkit-scrollbar-thumb:hover {
+  background: var(--logs-text-secondary);
+}
+
+.submission-placeholder {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--logs-card-bg);
+  border-radius: 10px;
+  padding: 40px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .submission-placeholder {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.submission-placeholder p {
+  color: var(--logs-text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .logs-content {
+    grid-template-columns: 1fr;
+  }
+
+  .submission-placeholder {
+    grid-column: 1;
+  }
+
+  .submissions-grid {
+    max-height: 400px;
+  }
+
+  .submission-details {
+    max-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .submission-logs-container {
+    padding: 15px;
+  }
+
+  .submission-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .event-header {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+  }
+
+  .event-time {
+    display: none;
+  }
+
+  .logs-header h3 {
+    font-size: 20px;
+  }
+}
+

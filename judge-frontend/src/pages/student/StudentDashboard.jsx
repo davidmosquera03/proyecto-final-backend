@@ -1,7 +1,7 @@
 import React from 'react'
-import { useAuth } from '../auth/AuthProvider'
-import Header from '../components/Header'
-import { pruebas } from '../data/pruebas'
+import { useAuth } from '../../auth/AuthProvider'
+import Header from '../../components/Header'
+import { pruebas } from '../../data/pruebas'
 
 export default function StudentDashboard() {
   const { user } = useAuth()
@@ -38,7 +38,7 @@ export default function StudentDashboard() {
                 <div className="card-left">
                   <div className="prueba-name">{prueba.name}</div>
                   <div className="test-list">
-                    {prueba.tests.length > 0 ? prueba.tests.join(' · ') : <span className="muted">Sin tests definidos</span>}
+                    {prueba.challenges.length > 0 ? prueba.challenges.map(c => c.title).join(' · ') : <span className="muted">Sin tests definidos</span>}
                   </div>
                 </div>
                 <div className="card-right" aria-hidden>

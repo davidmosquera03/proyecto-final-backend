@@ -24,14 +24,14 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <h2>Iniciar sesión (prueba)</h2>
+      <h2>Iniciar sesión</h2>
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
           Usuario
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="student | teacher"
+            placeholder="Usuario"
             required
           />
         </label>
@@ -41,17 +41,13 @@ export default function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="student123 | teacher123"
+            placeholder="contraseña"
             required
           />
         </label>
         <button type="submit">Entrar</button>
         {error && <p className="auth-error">{error}</p>}
       </form>
-      <p className="auth-hint">
-        Usuarios de prueba: <strong>student/student123</strong> y{' '}
-        <strong>teacher/teacher123</strong>
-      </p>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
 // Hardcoded test users
 const USERS = [
@@ -10,13 +10,30 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Restaurar sesión desde localStorage al montar
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('authUser')
+      if (storedUser) {
+        setUser(JSON.parse(storedUser))
+      }
+    } catch (err) {
+      console.error('Error restaurando sesión:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   function login(username, password) {
     const found = USERS.find(
       (u) => u.username === username && u.password === password,
     )
     if (found) {
-      setUser({ username: found.username, role: found.role })
+      const userData = { username: found.username, role: found.role }
+      setUser(userData)
+      localStorage.setItem('authUser', JSON.stringify(userData))
       return { ok: true }
     }
     return { ok: false, message: 'Credenciales inválidas' }
@@ -24,6 +41,7 @@ export function AuthProvider({ children }) {
 
   function logout() {
     setUser(null)
+    localStorage.removeItem('authUser')
   }
 
   const value = { user, login, logout }

@@ -4,8 +4,10 @@ import './App.css'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import Header from './components/Header'
 import Login from './pages/Login'
-import StudentDashboard from './pages/StudentDashboard'
-import TeacherDashboard from './pages/TeacherDashboard'
+import StudentDashboard from './pages/student/StudentDashboard'
+import TeacherDashboard from './pages/teacher/TeacherDashboard'
+import CreateTestPage from './pages/teacher/CreateTestPage'
+import SubmissionsPage from './pages/teacher/SubmissionsPage'
 
 function RequireAuth({ children, role }) {
   const { user } = useAuth()
@@ -36,6 +38,22 @@ function AppRoutes() {
         element={
           <RequireAuth role="teacher">
             <TeacherDashboard />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/teacher/create-test"
+        element={
+          <RequireAuth role="teacher">
+            <CreateTestPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/teacher/submissions"
+        element={
+          <RequireAuth role="teacher">
+            <SubmissionsPage />
           </RequireAuth>
         }
       />

@@ -1,0 +1,365 @@
+/**
+ * Estilos para la página de Submissions
+ */
+
+:root {
+  /* Colores específicos para SubmissionsPage */
+  --page-bg: #f8f9fa;
+  --page-header-bg-start: #667eea;
+  --page-header-bg-end: #764ba2;
+  --page-text: #1f2937;
+  --page-text-muted: #6b7280;
+  --stat-card-bg: #ffffff;
+  --info-section-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #0f1115;
+    --page-header-bg-start: #1f6feb;
+    --page-header-bg-end: #388bfd;
+    --page-text: #e6eef8;
+    --page-text-muted: #8c9199;
+    --stat-card-bg: #121417;
+    --info-section-bg: #121417;
+  }
+}
+
+.submissions-page {
+  min-height: 100vh;
+  background: var(--page-bg);
+  padding: 30px 20px;
+  transition: background-color 200ms ease;
+}
+
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto 40px auto;
+  padding: 30px;
+  background: var(--info-section-bg);
+  color: var(--page-text);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.page-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.page-header p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* Grid de estadísticas */
+.stats-grid {
+  max-width: 1400px;
+  margin: 0 auto 40px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--stat-card-bg);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s ease;
+  border-left: 4px solid #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.stat-card.stat-total {
+  border-left-color: #3b82f6;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-total {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-card.stat-accepted {
+  border-left-color: #22c55e;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-accepted {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-card.stat-wrong {
+  border-left-color: #ef4444;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-wrong {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-card.stat-timeout {
+  border-left-color: #f97316;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-timeout {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-card.stat-error {
+  border-left-color: #dc2626;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-error {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-card.stat-avg-time {
+  border-left-color: #8b5cf6;
+  background: var(--stat-card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card.stat-avg-time {
+    background: var(--stat-card-bg);
+  }
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--page-text);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--page-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Sección de información */
+.info-section {
+  max-width: 1400px;
+  margin: 40px auto 0 auto;
+  padding: 40px 30px;
+  background: var(--info-section-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .info-section {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.info-section h3 {
+  margin: 0 0 30px 0;
+  font-size: 22px;
+  color: var(--page-text);
+  font-weight: 700;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .info-section h3 {
+    border-bottom-color: #23262a;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .info-card {
+    background: #0d1117;
+    border-color: #23262a;
+  }
+}
+
+.info-card:hover {
+  border-color: #d1d5db;
+  background: #f3f4f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .info-card:hover {
+    border-color: #30363d;
+    background: #161b22;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.info-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  color: var(--page-text);
+  font-weight: 600;
+}
+
+.info-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--page-text-muted);
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .page-header {
+    padding: 20px;
+  }
+
+  .page-header h2 {
+    font-size: 24px;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .submissions-page {
+    padding: 15px 10px;
+  }
+
+  .page-header {
+    padding: 20px 15px;
+    margin-bottom: 25px;
+  }
+
+  .page-header h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .stat-card {
+    padding: 15px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .info-section {
+    padding: 20px 15px;
+    margin-top: 25px;
+  }
+
+  .info-section h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .info-content h4 {
+    font-size: 14px;
+  }
+
+  .info-content p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header h2 {
+    font-size: 18px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+}
