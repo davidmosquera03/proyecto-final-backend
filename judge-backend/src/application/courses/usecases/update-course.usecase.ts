@@ -12,7 +12,6 @@ export class UpdateCourseUseCase {
       if (!existing) {
         return null;
       }
-      // Check if code is taken by another course
       const codeTaken = await this.courseRepo.existsByCode(input.code);
       if (codeTaken && existing.code !== input.code) {
         throw new ConflictException('Course code already in use');

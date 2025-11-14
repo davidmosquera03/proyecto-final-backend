@@ -29,7 +29,7 @@ async delete(id: string): Promise<boolean> {
         await this.prisma.challenge.delete({ where: { id } });
         return true;
     } catch {
-        return false; // User not found
+        return false;
     }
 }
 
@@ -115,7 +115,7 @@ async delete(id: string): Promise<boolean> {
             updated.updatedAt
     );
   } catch {
-    return null; // Challenge not found
+    return null;
   }
 }
 }
