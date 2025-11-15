@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SubmissionProcessor } from './submission.processor';
 import { PrismaService } from '../infrastructure/prisma.service';
-
+import { RunnerService } from 'src/runners/runner.service';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -44,6 +44,6 @@ import { PrismaService } from '../infrastructure/prisma.service';
       },
     }),
   ],
-  providers: [SubmissionProcessor, PrismaService],
+  providers: [SubmissionProcessor, PrismaService, RunnerService],
 })
 export class WorkerModule {}
