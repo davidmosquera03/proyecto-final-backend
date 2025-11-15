@@ -12,9 +12,34 @@ model User {
   id           String        @id @default(uuid())
   email        String        @unique
   password     String
-  role         String        // 'ADMIN' | 'STUDENT'
+  role         String
   submissions  Submission[]
   leaderboards Leaderboard[]
+  courses      CourseEnrollment[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  name        String
+  description String?      @db.Text
+  code        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  challenges  Challenge[]
+  enrollments CourseEnrollment[]
+}
+
+model CourseEnrollment {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
 }
 
 model Challenge {
@@ -23,13 +48,17 @@ model Challenge {
   description String       @db.Text
   difficulty  Difficulty
   tags        String[]
-  timeLimit   Int          // milisegundos
-  memoryLimit Int          // MB
+  timeLimit   Int
+  memoryLimit Int
   status      Status       @default(DRAFT)
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   testCases   TestCase[]
   submissions Submission[]
+
+  @@index([courseId])
 }
 
 model TestCase {
@@ -38,7 +67,7 @@ model TestCase {
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   input       String    @db.Text
   output      String    @db.Text
-  isHidden    Boolean   @default(false) // Si es visible para el estudiante
+  isHidden    Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -54,9 +83,9 @@ model Submission {
   code        String           @db.Text
   language    Language
   status      SubmissionStatus @default(PENDING)
-  score       Float            @default(0) // Puntuación obtenida
-  executionTime Int?           // milisegundos
-  memoryUsed  Int?             // MB
+  score       Float            @default(0)
+  executionTime Int?
+  memoryUsed  Int?
   errorMessage String?         @db.Text
   testsPassed Int              @default(0)
   testsTotal  Int              @default(0)
@@ -72,7 +101,7 @@ model Leaderboard {
   id          String   @id @default(uuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challengeId String?  // Null para leaderboard global
+  challengeId String?
   score       Float    @default(0)
   submissions Int      @default(0)
   lastSubmit  DateTime?

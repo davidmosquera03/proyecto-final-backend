@@ -7,6 +7,7 @@ export class ChallengeDto {
   timeLimit: number;
   memoryLimit: number;
   status: string;
+  courseId: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -4,7 +4,7 @@ export class TestCase {
     public challengeId: string,
     public input: string,
     public output: string,
-    public isHidden: boolean, // Si es visible para el estudiante
+    public isHidden: boolean,
     public createdAt: Date,
     public updatedAt: Date
   ) {}

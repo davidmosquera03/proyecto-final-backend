@@ -9,6 +9,7 @@ export function toChallengeDto(challenge: Challenge) {
     timeLimit: challenge.timeLimit,
     memoryLimit: challenge.memoryLimit,
     status: challenge.status,
+    courseId: challenge.courseId,
     createdAt: challenge.createdAt,
     updatedAt: challenge.updatedAt
   };

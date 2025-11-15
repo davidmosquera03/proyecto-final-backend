@@ -17,6 +17,7 @@ export class PrismaChallengeRepository implements ChallengeRepositoryPort {
             found.timeLimit,
             found.memoryLimit,
             found.status,
+            found.courseId,
             found.createdAt,
             found.updatedAt
         ) : null;
@@ -28,7 +29,7 @@ async delete(id: string): Promise<boolean> {
         await this.prisma.challenge.delete({ where: { id } });
         return true;
     } catch {
-        return false; // User not found
+        return false;
     }
 }
 
@@ -42,7 +43,8 @@ async delete(id: string): Promise<boolean> {
         tags: challenge.tags,
         timeLimit: challenge.timeLimit,
         memoryLimit: challenge.memoryLimit,
-        status: challenge.status
+        status: challenge.status,
+        courseId: challenge.courseId
       },
       create: { 
         id: challenge.id, 
@@ -52,7 +54,8 @@ async delete(id: string): Promise<boolean> {
         tags: challenge.tags,
         timeLimit: challenge.timeLimit,
         memoryLimit: challenge.memoryLimit,
-        status: challenge.status
+        status: challenge.status,
+        courseId: challenge.courseId
       },
     });
     return new Challenge( 
@@ -64,6 +67,7 @@ async delete(id: string): Promise<boolean> {
             saved.timeLimit,
             saved.memoryLimit,
             saved.status,
+            saved.courseId,
             saved.createdAt,
             saved.updatedAt
     );
@@ -80,6 +84,7 @@ async delete(id: string): Promise<boolean> {
             r.timeLimit,
             r.memoryLimit,
             r.status,
+            r.courseId,
             r.createdAt,
             r.updatedAt
     ));
@@ -105,11 +110,12 @@ async delete(id: string): Promise<boolean> {
             updated.timeLimit,
             updated.memoryLimit,
             updated.status,
+            updated.courseId,
             updated.createdAt,
             updated.updatedAt
     );
   } catch {
-    return null; // Challenge not found
+    return null;
   }
 }
 }

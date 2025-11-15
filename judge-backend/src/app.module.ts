@@ -5,6 +5,8 @@ import { SubmissionService } from './submissions/submission.service';
 import { SubmissionController } from './submissions/submission.controller';
 import { PrismaService } from './infrastructure/prisma.service';
 import { ChallengesHttpModule } from './presentation/challenges/challenges.module';
+import { CoursesHttpModule } from './presentation/courses/courses.module';
+import { TestCasesHttpModule } from './presentation/test-cases/test-cases.module';
 import { AiChallengeModule } from './ai-challenge/ai-challenge.module';
 
 @Module({
@@ -50,6 +52,8 @@ import { AiChallengeModule } from './ai-challenge/ai-challenge.module';
     }),
 
     ChallengesHttpModule,
+    CoursesHttpModule,
+    TestCasesHttpModule,
     AiChallengeModule
   ],
   controllers: [SubmissionController],
