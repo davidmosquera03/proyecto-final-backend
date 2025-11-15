@@ -50,7 +50,9 @@ services:
       - judge_network
 
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
     container_name: judge-worker
     restart: always
     depends_on:
@@ -64,6 +66,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /usr/src/app
     command: sh -c "npx prisma migrate deploy && npm run start:worker"
     networks:

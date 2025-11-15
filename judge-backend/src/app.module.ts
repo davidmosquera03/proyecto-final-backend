@@ -5,6 +5,7 @@ import { SubmissionService } from './submissions/submission.service';
 import { SubmissionController } from './submissions/submission.controller';
 import { PrismaService } from './infrastructure/prisma.service';
 import { ChallengesHttpModule } from './presentation/challenges/challenges.module';
+import { AiChallengeModule } from './ai-challenge/ai-challenge.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ChallengesHttpModule } from './presentation/challenges/challenges.modul
     }),
 
     ChallengesHttpModule,
+    AiChallengeModule
   ],
   controllers: [SubmissionController],
   providers: [SubmissionService, PrismaService],
