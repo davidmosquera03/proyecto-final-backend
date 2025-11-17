@@ -1,9 +1,8 @@
-# run.py
-import sys, subprocess, os, tempfile, json, time
+import sys, subprocess, os, tempfile, json, time, base64
 
 def main():
-    code = os.environ.get("CODE","")
-    timeout_s = float(os.environ.get("TIMEOUT", "5"))  # segundos
+    code = base64.b64decode(os.environ.get("CODE_B64", "")).decode()
+    timeout_s = float(os.environ.get("TIMEOUT", "5"))
     stdin_data = sys.stdin.read()
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
@@ -18,12 +17,24 @@ def main():
                 stderr=subprocess.STDOUT,
                 timeout=timeout_s
             ).decode()
+
             duration_ms = int((time.time() - start) * 1000)
-            print(json.dumps({"success": True, "output": output, "timeMs": duration_ms}))
+            print(json.dumps({
+                "success": True,
+                "output": output,
+                "timeMs": duration_ms
+            }))
+
         except subprocess.CalledProcessError as e:
-            print(json.dumps({"success": False, "error": e.output.decode()}))
+            print(json.dumps({
+                "success": False,
+                "error": e.output.decode()
+            }))
         except subprocess.TimeoutExpired:
-            print(json.dumps({"success": False, "error": "Timeout"}))
+            print(json.dumps({
+                "success": False,
+                "error": "Timeout"
+            }))
 
 if __name__ == "__main__":
     main()
