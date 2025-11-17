@@ -72,6 +72,11 @@ services:
     networks:
       - judge_network
 
+  runner_python:
+    build:
+      context: ./src/runners/python
+    image: runner-python
+    
 volumes:
   postgres_data:
   redis_data:

@@ -25,31 +25,107 @@ export class SubmissionProcessor extends WorkerHost {
   super();
  }
 
-  async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: string }> {
-  const { submissionId, code, language } = job.data;
+async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: string }> {
+  const { submissionId, code, language, challengeId } = job.data;
   this.logger.log(`Running submission ${submissionId}...`);
 
+  // 1. Marcar como running
   await this.prisma.submission.update({
     where: { id: submissionId },
     data: { status: 'RUNNING' },
   });
 
-  const { output } = await this.runner.runCode(language, code);
+  // 2. Obtener challenge + testcases
+  const challenge = await this.prisma.challenge.findUnique({
+    where: { id: challengeId },
+    include: { testCases: true },
+  });
 
-  this.logger.log(`Output for submission ${submissionId}:\n${output}`);
+  if (!challenge) throw new Error("Challenge not found");
 
+  const timeLimitMs = challenge.timeLimit ?? 2000;
+  const testcases = challenge.testCases;
+
+  let passed = 0;
+  let total = testcases.length;
+  let totalTime = 0;
+
+  // 3. Ejecutar cada testcase
+  for (const tc of testcases) {
+
+    const result = await this.runner.runCode(
+      language,
+      code,
+      tc.input,
+      timeLimitMs
+    );
+
+    // Error del runner
+    if (!result.success) {
+      if (result.error === "Timeout") {
+        await this.prisma.submission.update({
+          where: { id: submissionId },
+          data: {
+            status: 'TIME_LIMIT_EXCEEDED',
+            testsPassed: passed,
+            testsTotal: total,
+            executionTime: totalTime,
+          },
+        });
+        return { result: 'TLE', submissionId };
+      }
+
+      // runtime error
+      await this.prisma.submission.update({
+        where: { id: submissionId },
+        data: {
+          status: 'RUNTIME_ERROR',
+          testsPassed: passed,
+          testsTotal: total,
+          executionTime: totalTime,
+        },
+      });
+      return { result: 'RE', submissionId };
+    }
+
+    // Comparar salida
+    const studentOutput = result.output.trim();
+    const expectedOutput = tc.output.trim();
+
+    if (studentOutput !== expectedOutput) {
+      await this.prisma.submission.update({
+        where: { id: submissionId },
+        data: {
+          status: 'WRONG_ANSWER',
+          testsPassed: passed,
+          testsTotal: total,
+          executionTime: totalTime,
+        },
+      });
+
+      return { result: 'WA', submissionId };
+    }
+
+    // OK
+    passed++;
+    totalTime += result.timeMs ?? 0;
+  }
+
+  // 4. Todos correctos → ACCEPTED
   await this.prisma.submission.update({
     where: { id: submissionId },
     data: {
-      status: 'ACCEPTED', // placeholder, later depends on test results
+      status: 'ACCEPTED',
       score: 100,
-      testsPassed: 1,
-      testsTotal: 1,
+      testsPassed: passed,
+      testsTotal: total,
+      executionTime: totalTime,
     },
   });
 
   return { result: 'OK', submissionId };
 }
+
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job) {
