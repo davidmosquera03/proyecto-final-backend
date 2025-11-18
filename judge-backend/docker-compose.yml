@@ -82,6 +82,10 @@ services:
       context: ./src/runners/cpp
     image: runner-cpp
 
+  runner-java:
+    build:
+      context: ./src/runners/java
+    image: runner-java
     
 volumes:
   postgres_data:

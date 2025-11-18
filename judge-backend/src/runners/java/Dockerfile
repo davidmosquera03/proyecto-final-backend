@@ -1,5 +1,10 @@
-FROM openjdk:17-alpine
-WORKDIR /runner
-COPY run.sh /runner/run.sh
-RUN chmod +x /runner/run.sh
-ENTRYPOINT ["/runner/run.sh"]
+FROM eclipse-temurin:17-jdk-alpine
+
+RUN apk add --no-cache coreutils
+
+WORKDIR /app
+
+COPY run.sh /app/run.sh
+RUN chmod +x /app/run.sh
+
+ENTRYPOINT ["/app/run.sh"]
