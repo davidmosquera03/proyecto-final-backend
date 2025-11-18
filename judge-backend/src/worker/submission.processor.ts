@@ -52,14 +52,14 @@ async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: 
 
   // 3. Ejecutar cada testcase
   for (const tc of testcases) {
-
+    
     const result = await this.runner.runCode(
       language,
       code,
       tc.input,
       timeLimitMs
     );
-
+    this.logger.debug(`TC ${tc.id} expected=${tc.output.trim()} got=${(result.output||'').trim()} success=${result.success} error=${result.error||''} timeMs=${result.timeMs||0}`);
     // Error del runner
     if (!result.success) {
       if (result.error === "Timeout") {
@@ -93,18 +93,18 @@ async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: 
     const expectedOutput = tc.output.trim();
 
     if (studentOutput !== expectedOutput) {
-      await this.prisma.submission.update({
-        where: { id: submissionId },
-        data: {
-          status: 'WRONG_ANSWER',
-          testsPassed: passed,
-          testsTotal: total,
-          executionTime: totalTime,
-        },
-      });
-
-      return { result: 'WA', submissionId };
-    }
+  await this.prisma.submission.update({
+    where: { id: submissionId },
+    data: {
+      status: 'WRONG_ANSWER',
+      testsPassed: passed,
+      testsTotal: total,
+      executionTime: totalTime,
+      errorMessage: `TC ${tc.id} expected="${expectedOutput}" got="${studentOutput}"`
+    },
+  });
+  return { result: 'WA', submissionId };
+}
 
     // OK
     passed++;

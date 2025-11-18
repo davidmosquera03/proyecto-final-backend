@@ -76,6 +76,12 @@ services:
     build:
       context: ./src/runners/python
     image: runner-python
+
+  runner_cpp:
+    build:
+      context: ./src/runners/cpp
+    image: runner-cpp
+
     
 volumes:
   postgres_data:
