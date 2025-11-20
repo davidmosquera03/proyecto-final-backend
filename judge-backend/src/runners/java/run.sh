@@ -9,7 +9,8 @@ if [ $? -ne 0 ]; then
   exit 0
 fi
 
-OUT=$(timeout "$TIMEOUT" java -cp /app Main 2>&1)
+# Use timeout and capture both output and exit code
+OUT=$(timeout "$TIMEOUT" java -cp /app Main)
 EXIT=$?
 
 if [ $EXIT -eq 124 ]; then
@@ -18,7 +19,7 @@ if [ $EXIT -eq 124 ]; then
 fi
 
 if [ $EXIT -ne 0 ]; then
-  ERR=$(echo "$OUT" | sed 's/"/\\"/g' | tr '\n' ' ')
+  ERR=$(echo "$OUT" | tail -1 | sed 's/"/\\"/g')
   echo "{\"success\": false, \"error\": \"$ERR\", \"output\": \"\"}"
   exit 0
 fi
