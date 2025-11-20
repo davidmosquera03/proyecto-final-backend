@@ -7,7 +7,7 @@ import { User } from 'src/domain/users/user.entity';
 export class PrismaUserRepository implements IUserRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(userData: { email: string; password: string; role: 'ADMIN' | 'STUDENT' }): Promise<User> {
+  async create(userData: { email: string; password: string; role: 'ADMIN' | 'STUDENT' | 'TEACHER' }): Promise<User> {
     const u = await this.prisma.user.create({
       data: {
         email: userData.email,
@@ -15,17 +15,17 @@ export class PrismaUserRepository implements IUserRepository {
         role: userData.role,
       },
     });
-    return new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT');
+    return new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT' | 'TEACHER');
   }
 
   async findByEmail(email: string): Promise<User | null> {
     const u = await this.prisma.user.findUnique({ where: { email } });
-    return u ? new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT') : null;
+    return u ? new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT' | 'TEACHER') : null;
   }
 
   async findById(id: string): Promise<User | null> {
     const u = await this.prisma.user.findUnique({ where: { id } });
-    return u ? new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT') : null;
+    return u ? new User(u.id, u.email, u.password, u.role as 'ADMIN' | 'STUDENT' | 'TEACHER') : null;
   }
 
   async updateHashedRefreshToken(userId: string, hashed: string | null): Promise<void> {

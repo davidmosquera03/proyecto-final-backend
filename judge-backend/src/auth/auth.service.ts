@@ -14,7 +14,12 @@ export class AuthService {
     const token = this.jwtService.sign(payload, { expiresIn: '15m' });
     return token;
   }
-
+  async generateRefreshToken(userId: string, email: string, role: string) {
+    const payload = { sub: userId, email, role };
+    const token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    return token;
+  }
+  
   async validateAccessToken(token: string) {
     try {
       return this.jwtService.verify(token);

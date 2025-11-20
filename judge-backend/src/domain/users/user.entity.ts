@@ -3,6 +3,6 @@ export class User {
     public id: string,
     public email: string,
     public password: string,
-    public role: 'ADMIN' | 'STUDENT',
+    public role: 'ADMIN' | 'STUDENT' | 'TEACHER',
   ) {}
 }

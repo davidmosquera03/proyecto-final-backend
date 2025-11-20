@@ -20,8 +20,8 @@ export class AdminGuard implements CanActivate {
     const user = req.user;
     // Si no hay usuario, permitir que JwtAuthGuard haya fallado antes
     if (!user) return false;
-    if (user.role !== 'ADMIN') {
-      throw new ForbiddenException('Admin role required');
+    if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+      throw new ForbiddenException('Admin or Teacher role required');
     }
     return true;
   }
