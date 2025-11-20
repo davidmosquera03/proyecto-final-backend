@@ -1,4 +1,7 @@
-FROM node:20-alpine
+FROM node:18-alpine
+
 WORKDIR /runner
-COPY run.js /runner/run.js
-ENTRYPOINT ["node", "run.js"]
+COPY run.sh /runner/run.sh
+RUN chmod +x /runner/run.sh
+
+ENTRYPOINT ["/runner/run.sh"]

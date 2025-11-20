@@ -1,6 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine
-
-RUN apk add --no-cache coreutils
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 

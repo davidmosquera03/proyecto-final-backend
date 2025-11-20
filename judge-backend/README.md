@@ -3,6 +3,7 @@
 ## Modo 1: Todo en docker
 
 ```
+cd judge-backend
 npm install
 npx prisma generate
 docker-compose up -d --build

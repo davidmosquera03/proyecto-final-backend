@@ -66,11 +66,12 @@ async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: 
         await this.prisma.submission.update({
           where: { id: submissionId },
           data: {
-            status: 'TIME_LIMIT_EXCEEDED',
-            testsPassed: passed,
-            testsTotal: total,
-            executionTime: totalTime,
-          },
+          status: 'TIME_LIMIT_EXCEEDED',
+          testsPassed: passed,
+          testsTotal: total,
+          executionTime: totalTime,
+          errorMessage: result.error ?? null,
+        },
         });
         return { result: 'TLE', submissionId };
       }
@@ -79,11 +80,12 @@ async process(job: Job<SubmissionJob>): Promise<{ result: string; submissionId: 
       await this.prisma.submission.update({
         where: { id: submissionId },
         data: {
-          status: 'RUNTIME_ERROR',
-          testsPassed: passed,
-          testsTotal: total,
-          executionTime: totalTime,
-        },
+        status: 'RUNTIME_ERROR',
+        testsPassed: passed,
+        testsTotal: total,
+        executionTime: totalTime,
+        errorMessage: result.error ?? null,
+      },
       });
       return { result: 'RE', submissionId };
     }

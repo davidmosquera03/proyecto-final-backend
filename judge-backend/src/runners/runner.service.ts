@@ -14,7 +14,10 @@ export class RunnerService {
 
     const image = this.getImage(language);
     if (!image) throw new Error(`Unsupported language: ${language}`);
-
+    // Java gets more time (industry-standard multiplier)
+    if (language.toUpperCase() === "JAVA") {
+      timeoutMs = timeoutMs * 2;
+    }
     const timeoutSeconds = Math.ceil(timeoutMs / 1000);
     const codeBase64 = Buffer.from(code, "utf8").toString("base64");
 
@@ -75,6 +78,7 @@ export class RunnerService {
       case 'PYTHON': return 'runner-python';
       case 'CPP': return 'runner-cpp';
       case 'JAVA': return 'runner-java';
+      case 'JAVASCRIPT':return 'runner-node';
       default: return null;
     }
   }
