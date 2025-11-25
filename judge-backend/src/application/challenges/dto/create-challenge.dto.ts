@@ -35,4 +35,8 @@ export class CreateChallengeDto {
   @IsInt()
   @Min(16)
   memoryLimit: number;
+
+  @ApiProperty({ example: 'course-uuid' })
+  @IsString()
+  courseId: string;
 }

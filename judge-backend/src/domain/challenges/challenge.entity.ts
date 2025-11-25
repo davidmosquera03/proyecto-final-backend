@@ -1,7 +1,6 @@
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 export type Status = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
-// domain/entities/Challenge.ts
 export class Challenge {
   constructor(
     public readonly id: string,
@@ -12,6 +11,7 @@ export class Challenge {
     public timeLimit: number,
     public memoryLimit: number,
     public status: Status,
+    public courseId: string,
     public createdAt: Date,
     public updatedAt: Date
   ) {}

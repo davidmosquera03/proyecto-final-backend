@@ -20,6 +20,7 @@ export class CreateChallengeUseCase {
         input.timeLimit,
         input.memoryLimit,
         'DRAFT',
+        input.courseId,
         new Date(),
         new Date()
         );

@@ -1,0 +1,2 @@
+export const TEST_CASE_REPOSITORY = Symbol('TEST_CASE_REPOSITORY');
+

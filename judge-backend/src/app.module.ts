@@ -1,10 +1,63 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SubmissionService } from './submissions/submission.service';
+import { SubmissionController } from './submissions/submission.controller';
+import { PrismaService } from './infrastructure/prisma.service';
 import { ChallengesHttpModule } from './presentation/challenges/challenges.module';
+import { CoursesHttpModule } from './presentation/courses/courses.module';
+import { TestCasesHttpModule } from './presentation/test-cases/test-cases.module';
+import { AiChallengeModule } from './ai-challenge/ai-challenge.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ChallengesHttpModule
+    
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        return {
+          connection: {
+            host: configService.get<string>('REDIS_HOST', 'localhost'),
+            port: parseInt(configService.get<string>('REDIS_PORT', '6379'), 10),
+            password: configService.get<string>('REDIS_PASSWORD'),
+            maxRetriesPerRequest: null,
+            enableReadyCheck: false,
+            retryStrategy: (times: number) => {
+              const delay = Math.min(times * 50, 2000);
+              return delay;
+            },
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
+
+    BullModule.registerQueue({
+      name: 'submissions',
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+        removeOnComplete: {
+          age: 86400,
+          count: 1000,
+        },
+        removeOnFail: {
+          age: 604800,
+        },
+      },
+    }),
+
+    ChallengesHttpModule,
+    CoursesHttpModule,
+    TestCasesHttpModule,
+    AiChallengeModule
   ],
+  controllers: [SubmissionController],
+  providers: [SubmissionService, PrismaService],
+  exports: [PrismaService],
 })
 export class AppModule {}
