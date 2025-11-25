@@ -1,0 +1,1044 @@
+openapi: 3.0.0
+info:
+  title: Judge Platform API
+  version: 1.0.0
+  description: Competitive programming judge platform with AI-powered challenge generation
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: General
+    description: General application endpoints
+  - name: Auth
+    description: Authentication and user management
+  - name: AI Challenge Generator
+    description: AI-powered challenge and test case generation
+  - name: Challenges
+    description: Programming challenge management
+  - name: Courses
+    description: Course management
+  - name: Test Cases
+    description: Test case management for challenges
+  - name: Submissions
+    description: Code submission and evaluation
+
+paths:
+  /:
+    get:
+      tags:
+        - General
+      summary: Health check
+      description: Returns a welcome message to verify the API is running
+      responses:
+        '200':
+          description: API is running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Hello World!
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Creates a new user account and returns JWT tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - role
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  example: mypassword123
+                role:
+                  type: string
+                  enum: [ADMIN, STUDENT]
+                  example: STUDENT
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+        '400':
+          description: Invalid input data
+        '409':
+          description: User already exists
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      description: Authenticates a user and returns JWT tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: mypassword123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /auth/profile:
+    get:
+      tags:
+        - Auth
+      summary: Get authenticated user profile
+      description: Returns the profile of the currently authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+        '401':
+          description: Unauthorized - invalid or missing token
+
+  /ai-challenge/challenge-idea:
+    get:
+      tags:
+        - AI Challenge Generator
+      summary: Generate a challenge idea
+      description: Uses Google Gemini AI to generate a programming challenge idea based on a category
+      parameters:
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Challenge category
+          example: Binary Trees
+      responses:
+        '200':
+          description: Challenge idea generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  difficulty:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  timeLimit:
+                    type: integer
+                  memoryLimit:
+                    type: integer
+        '400':
+          description: Category parameter is required
+
+  /ai-challenge/test-cases:
+    post:
+      tags:
+        - AI Challenge Generator
+      summary: Generate test cases for a challenge
+      description: Uses Google Gemini AI to generate test cases based on a challenge description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Two Sum
+                description:
+                  type: string
+                  example: Given an array of integers and a target...
+                difficulty:
+                  type: string
+                  example: EASY
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: [arrays, hashmap]
+                timeLimit:
+                  type: integer
+                  example: 1500
+                memoryLimit:
+                  type: integer
+                  example: 256
+      responses:
+        '200':
+          description: Test cases generated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    input:
+                      type: string
+                    output:
+                      type: string
+                    isHidden:
+                      type: boolean
+        '400':
+          description: Challenge data is required
+
+  /challenges:
+    get:
+      tags:
+        - Challenges
+      summary: List all challenges
+      description: Retrieves a list of all programming challenges
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    difficulty:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                    timeLimit:
+                      type: integer
+                    memoryLimit:
+                      type: integer
+                    courseId:
+                      type: string
+        '401':
+          description: Unauthorized
+
+    post:
+      tags:
+        - Challenges
+      summary: Create a new challenge
+      description: Creates a new programming challenge (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - difficulty
+                - tags
+                - timeLimit
+                - memoryLimit
+                - courseId
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                  example: Two Sum
+                description:
+                  type: string
+                  example: Given an array of integers and a target...
+                difficulty:
+                  type: string
+                  enum: [EASY, MEDIUM, HARD]
+                  example: EASY
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: [arrays, hashmap]
+                timeLimit:
+                  type: integer
+                  minimum: 100
+                  example: 1500
+                memoryLimit:
+                  type: integer
+                  minimum: 16
+                  example: 256
+                courseId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  difficulty:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  timeLimit:
+                    type: integer
+                  memoryLimit:
+                    type: integer
+                  courseId:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /challenges/{id}:
+    get:
+      tags:
+        - Challenges
+      summary: Get challenge by ID
+      description: Retrieves a specific challenge by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Challenge found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  difficulty:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  timeLimit:
+                    type: integer
+                  memoryLimit:
+                    type: integer
+                  courseId:
+                    type: string
+        '404':
+          description: Challenge not found
+        '401':
+          description: Unauthorized
+
+    put:
+      tags:
+        - Challenges
+      summary: Update a challenge
+      description: Updates an existing challenge (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                difficulty:
+                  type: string
+                  enum: [EASY, MEDIUM, HARD]
+                tags:
+                  type: array
+                  items:
+                    type: string
+                timeLimit:
+                  type: integer
+                memoryLimit:
+                  type: integer
+      responses:
+        '200':
+          description: Challenge updated successfully
+        '404':
+          description: Challenge not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+    delete:
+      tags:
+        - Challenges
+      summary: Delete a challenge
+      description: Deletes a challenge by ID (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Challenge deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: Challenge not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /courses:
+    get:
+      tags:
+        - Courses
+      summary: List all courses
+      description: Retrieves a list of all courses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    code:
+                      type: string
+        '401':
+          description: Unauthorized
+
+    post:
+      tags:
+        - Courses
+      summary: Create a new course
+      description: Creates a new course (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - code
+              properties:
+                name:
+                  type: string
+                  maxLength: 200
+                  example: Algorithms and Data Structures
+                description:
+                  type: string
+                  example: Introductory course on algorithms
+                code:
+                  type: string
+                  maxLength: 50
+                  example: CS101
+      responses:
+        '201':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  code:
+                    type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /courses/{id}:
+    get:
+      tags:
+        - Courses
+      summary: Get course by ID
+      description: Retrieves a specific course by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Course found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  code:
+                    type: string
+        '404':
+          description: Course not found
+        '401':
+          description: Unauthorized
+
+    put:
+      tags:
+        - Courses
+      summary: Update a course
+      description: Updates an existing course (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Course updated successfully
+        '404':
+          description: Course not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+    delete:
+      tags:
+        - Courses
+      summary: Delete a course
+      description: Deletes a course by ID (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Course deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: Course not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /test-cases:
+    get:
+      tags:
+        - Test Cases
+      summary: List test cases
+      description: Retrieves a list of test cases, optionally filtered by challenge ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: challengeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter test cases by challenge ID
+      responses:
+        '200':
+          description: List of test cases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    challengeId:
+                      type: string
+                    input:
+                      type: string
+                    output:
+                      type: string
+                    isHidden:
+                      type: boolean
+        '401':
+          description: Unauthorized
+
+    post:
+      tags:
+        - Test Cases
+      summary: Create a new test case
+      description: Creates a new test case for a challenge (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - challengeId
+                - input
+                - output
+              properties:
+                challengeId:
+                  type: string
+                  format: uuid
+                input:
+                  type: string
+                  example: "5\n1 2 3 4 5"
+                output:
+                  type: string
+                  example: "15"
+                isHidden:
+                  type: boolean
+                  example: false
+      responses:
+        '201':
+          description: Test case created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  challengeId:
+                    type: string
+                  input:
+                    type: string
+                  output:
+                    type: string
+                  isHidden:
+                    type: boolean
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /test-cases/{id}:
+    get:
+      tags:
+        - Test Cases
+      summary: Get test case by ID
+      description: Retrieves a specific test case by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Test case found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  challengeId:
+                    type: string
+                  input:
+                    type: string
+                  output:
+                    type: string
+                  isHidden:
+                    type: boolean
+        '404':
+          description: Test case not found
+        '401':
+          description: Unauthorized
+
+    put:
+      tags:
+        - Test Cases
+      summary: Update a test case
+      description: Updates an existing test case (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: string
+                output:
+                  type: string
+                isHidden:
+                  type: boolean
+      responses:
+        '200':
+          description: Test case updated successfully
+        '404':
+          description: Test case not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+    delete:
+      tags:
+        - Test Cases
+      summary: Delete a test case
+      description: Deletes a test case by ID (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Test case deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: Test case not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /submissions:
+    get:
+      tags:
+        - Submissions
+      summary: Get submissions by user
+      description: Retrieves submissions for a specific user
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to filter submissions
+      responses:
+        '200':
+          description: List of user submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    code:
+                      type: string
+                    language:
+                      type: string
+                    status:
+                      type: string
+                    score:
+                      type: number
+                    testsPassed:
+                      type: integer
+                    testsTotal:
+                      type: integer
+                    userId:
+                      type: string
+                    challengeId:
+                      type: string
+        '400':
+          description: userId parameter is required
+
+    post:
+      tags:
+        - Submissions
+      summary: Submit code for evaluation
+      description: Submits code for a challenge and queues it for evaluation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - language
+                - userId
+                - challengeId
+              properties:
+                code:
+                  type: string
+                  example: "print('Hello')"
+                language:
+                  type: string
+                  enum: [PYTHON, JAVASCRIPT, TYPESCRIPT, JAVA, CPP]
+                  example: PYTHON
+                userId:
+                  type: string
+                  format: uuid
+                challengeId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Submission queued for processing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  submissionId:
+                    type: string
+                  jobId:
+                    type: string
+                  status:
+                    type: string
+                    example: PENDING
+        '400':
+          description: Invalid submission data
+
+  /submissions/{id}:
+    get:
+      tags:
+        - Submissions
+      summary: Get submission by ID
+      description: Retrieves the status and results of a specific submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Submission found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  code:
+                    type: string
+                  language:
+                    type: string
+                  status:
+                    type: string
+                    enum: [PENDING, RUNNING, ACCEPTED, WRONG_ANSWER, TIME_LIMIT_EXCEEDED, RUNTIME_ERROR, COMPILATION_ERROR]
+                  score:
+                    type: number
+                  testsPassed:
+                    type: integer
+                  testsTotal:
+                    type: integer
+                  executionTime:
+                    type: number
+                  memoryUsed:
+                    type: number
+                  userId:
+                    type: string
+                  challengeId:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        '404':
+          description: Submission not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string

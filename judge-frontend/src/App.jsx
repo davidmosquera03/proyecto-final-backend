@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
+import { ThemeProvider } from './components/ThemeProvider'
 import Header from './components/Header'
 import Login from './pages/Login'
 import StudentDashboard from './pages/student/StudentDashboard'
@@ -10,15 +11,39 @@ import CreateTestPage from './pages/teacher/CreateTestPage'
 import SubmissionsPage from './pages/teacher/SubmissionsPage'
 
 function RequireAuth({ children, role }) {
-  const { user } = useAuth()
+  const { user, isLoading } = useAuth()
+  
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  
   if (!user) {
     return <Navigate to="/login" replace />
   }
-  if (role && user.role !== role) {
-    // not authorized for this role
+  
+  if (role && user.role.toLowerCase() !== role.toLowerCase()) {
     return <Navigate to="/login" replace />
   }
+  
   return children
+}
+
+function HomeRedirect() {
+  const { user, isLoading } = useAuth()
+  
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  
+  if (user.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/teacher" replace />
+  }
+  
+  return <Navigate to="/student" replace />
 }
 
 function AppRoutes() {
@@ -36,7 +61,7 @@ function AppRoutes() {
       <Route
         path="/teacher"
         element={
-          <RequireAuth role="teacher">
+          <RequireAuth role="admin">
             <TeacherDashboard />
           </RequireAuth>
         }
@@ -44,7 +69,7 @@ function AppRoutes() {
       <Route
         path="/teacher/create-test"
         element={
-          <RequireAuth role="teacher">
+          <RequireAuth role="admin">
             <CreateTestPage />
           </RequireAuth>
         }
@@ -52,12 +77,12 @@ function AppRoutes() {
       <Route
         path="/teacher/submissions"
         element={
-          <RequireAuth role="teacher">
+          <RequireAuth role="admin">
             <SubmissionsPage />
           </RequireAuth>
         }
       />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<HomeRedirect />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
@@ -66,9 +91,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

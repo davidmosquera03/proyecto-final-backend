@@ -110,4 +110,26 @@ export class SubmissionService {
       },
     });
   }
+
+  async getAllSubmissions() {
+    return this.prisma.submission.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+          },
+        },
+        challenge: {
+          select: {
+            id: true,
+            title: true,
+            difficulty: true,
+          },
+        },
+      },
+    });
+  }
 }

@@ -1,11 +1,20 @@
-/**
- * Componente para visualizar logs estructurados de submissions
- * Muestra eventos en JSON con seguimiento por submissionId
- */
-
 import React, { useState } from 'react'
-import { submissionLogs, getSubmissionEventLog } from '../data/submissionLogs'
-import './SubmissionLogs.css'
+import { submissionLogs } from '../data/submissionLogs'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
+import { Badge } from './ui/badge'
+import { ScrollArea } from './ui/scroll-area'
+import { Separator } from './ui/separator'
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  AlertTriangle, 
+  ChevronRight, 
+  ChevronDown,
+  Terminal,
+  User,
+  Calendar
+} from 'lucide-react'
 
 export default function SubmissionLogs() {
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
@@ -13,25 +22,31 @@ export default function SubmissionLogs() {
 
   const selectedSubmission = submissionLogs.find(s => s.submissionId === selectedSubmissionId)
 
-  // Obtener el ícono y color del estado
-  function getStatusStyles(status) {
-    const styles = {
-      ACCEPTED: { icon: '✓', color: '#22c55e', bg: '#dcfce7' },
-      WRONG_ANSWER: { icon: '✗', color: '#ef4444', bg: '#fee2e2' },
-      TIME_LIMIT_EXCEEDED: { icon: '⏱', color: '#f97316', bg: '#ffedd5' },
-      RUNTIME_ERROR: { icon: '⚠', color: '#dc2626', bg: '#fecaca' }
-    };
-    return styles[status] || styles.WRONG_ANSWER;
+  function getStatusIcon(status) {
+    switch (status) {
+      case 'ACCEPTED': return <CheckCircle2 className="h-4 w-4 text-green-500" />
+      case 'WRONG_ANSWER': return <XCircle className="h-4 w-4 text-red-500" />
+      case 'TIME_LIMIT_EXCEEDED': return <Clock className="h-4 w-4 text-orange-500" />
+      default: return <AlertTriangle className="h-4 w-4 text-yellow-500" />
+    }
   }
 
-  // Obtener nivel de log con color
-  function getLogLevelStyles(level) {
-    const styles = {
-      info: { color: '#3b82f6', bg: '#eff6ff' },
-      warning: { color: '#f59e0b', bg: '#fffbeb' },
-      error: { color: '#ef4444', bg: '#fee2e2' }
-    };
-    return styles[level] || styles.info;
+  function getStatusColor(status) {
+    switch (status) {
+      case 'ACCEPTED': return 'bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20'
+      case 'WRONG_ANSWER': return 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20'
+      case 'TIME_LIMIT_EXCEEDED': return 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/20'
+      default: return 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/20'
+    }
+  }
+
+  function getLogLevelColor(level) {
+    switch (level) {
+      case 'info': return 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20'
+      case 'warning': return 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/20'
+      case 'error': return 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20'
+      default: return 'bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/20'
+    }
   }
 
   function toggleEventExpansion(index) {
@@ -39,150 +54,151 @@ export default function SubmissionLogs() {
   }
 
   return (
-    <div className="submission-logs-container">
-      <div className="logs-header">
-        <h3>Logs de Submissions</h3>
-        <p className="subtitle">Rastreo completo de ejecuciones con IDs únicos</p>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Submission Logs</h2>
+        <p className="text-muted-foreground">
+          Complete execution tracking with unique IDs and detailed events
+        </p>
       </div>
 
-      <div className="logs-content">
-        {/* Lista de submissions */}
-        <div className="submissions-list">
-          <h4>Submissions ({submissionLogs.length})</h4>
-          <div className="submissions-grid">
-            {submissionLogs.map((submission) => {
-              const statusStyles = getStatusStyles(submission.status);
-              const isSelected = selectedSubmissionId === submission.submissionId;
-              return (
-                <div
-                  key={submission.submissionId}
-                  className={`submission-card ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setSelectedSubmissionId(submission.submissionId)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') setSelectedSubmissionId(submission.submissionId)
-                  }}
-                >
-                  <div className="card-status" style={{ backgroundColor: statusStyles.bg }}>
-                    <span className="status-icon" style={{ color: statusStyles.color }}>
-                      {statusStyles.icon}
-                    </span>
-                    <span className="status-text">{submission.status}</span>
-                  </div>
-                  <div className="card-info">
-                    <div className="submission-id">{submission.submissionId}</div>
-                    <div className="challenge-name">{submission.challengeName}</div>
-                    <div className="submission-meta">
-                      Usuario: {submission.userId}
-                    </div>
-                    <div className="submission-time">
-                      {new Date(submission.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Detalles de eventos */}
-        {selectedSubmission && (
-          <div className="submission-details">
-            <h4>Eventos de {selectedSubmission.submissionId}</h4>
-            <div className="submission-summary">
-              <div className="summary-item">
-                <span className="label">Challenge:</span>
-                <span className="value">{selectedSubmission.challengeName}</span>
-              </div>
-              <div className="summary-item">
-                <span className="label">Usuario:</span>
-                <span className="value">{selectedSubmission.userId}</span>
-              </div>
-              <div className="summary-item">
-                <span className="label">Estado:</span>
-                <span
-                  className="value status-badge"
-                  style={{
-                    backgroundColor: getStatusStyles(selectedSubmission.status).bg,
-                    color: getStatusStyles(selectedSubmission.status).color
-                  }}
-                >
-                  {selectedSubmission.status}
-                </span>
-              </div>
-              <div className="summary-item">
-                <span className="label">Creado:</span>
-                <span className="value">
-                  {new Date(selectedSubmission.createdAt).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            <div className="events-log">
-              <h5>Timeline de Eventos</h5>
-              <div className="events-timeline">
-                {selectedSubmission.events.map((event, index) => {
-                  const logStyles = getLogLevelStyles(event.level);
-                  const isExpanded = expandedEventId === index;
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+        {/* Submissions List */}
+        <Card className="lg:col-span-1 flex flex-col h-full">
+          <CardHeader>
+            <CardTitle className="text-lg">Submissions ({submissionLogs.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 p-0">
+            <ScrollArea className="h-full px-4">
+              <div className="space-y-3 pb-4">
+                {submissionLogs.map((submission) => {
+                  const isSelected = selectedSubmissionId === submission.submissionId
                   return (
-                    <div key={index} className="event-item">
-                      <div
-                        className="event-header"
-                        onClick={() => toggleEventExpansion(index)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') toggleEventExpansion(index)
-                        }}
-                      >
-                        <div className="event-level" style={{ backgroundColor: logStyles.bg }}>
-                          <span style={{ color: logStyles.color }}>
-                            {event.level.toUpperCase()}
-                          </span>
+                    <div
+                      key={submission.submissionId}
+                      className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedSubmissionId(submission.submissionId)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className={`flex items-center gap-1 ${getStatusColor(submission.status)}`}>
+                          {getStatusIcon(submission.status)}
+                          {submission.status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {submission.submissionId.substring(0, 8)}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="font-medium text-sm line-clamp-1">{submission.challengeName}</div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          {submission.userId}
                         </div>
-                        <div className="event-message">
-                          <strong>{event.msg}</strong>
-                        </div>
-                        <div className="event-time">{event.timestamp}</div>
-                        <div className="expand-icon">
-                          {isExpanded ? '▼' : '▶'}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(submission.createdAt).toLocaleString()}
                         </div>
                       </div>
-
-                      {isExpanded && (
-                        <div className="event-details">
-                          <pre className="json-display">
-                            {JSON.stringify(
-                              {
-                                level: event.level,
-                                msg: event.msg,
-                                ...Object.fromEntries(
-                                  Object.entries(event).filter(
-                                    ([key]) => key !== 'level' && key !== 'msg' && key !== 'timestamp'
-                                  )
-                                )
-                              },
-                              null,
-                              2
-                            )}
-                          </pre>
-                        </div>
-                      )}
                     </div>
-                  );
+                  )
                 })}
               </div>
-            </div>
-          </div>
-        )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
 
-        {!selectedSubmission && (
-          <div className="submission-placeholder">
-            <p>Selecciona una submission para ver sus eventos en detalle</p>
-          </div>
-        )}
+        {/* Event Details */}
+        <Card className="lg:col-span-2 flex flex-col h-full">
+          <CardHeader>
+            <CardTitle className="text-lg">
+              {selectedSubmission ? `Events for ${selectedSubmission.submissionId}` : 'Event Details'}
+            </CardTitle>
+            {selectedSubmission && (
+              <CardDescription className="flex items-center gap-4 pt-2">
+                <span className="flex items-center gap-1">
+                  <Terminal className="h-4 w-4" />
+                  {selectedSubmission.challengeName}
+                </span>
+                <Separator orientation="vertical" className="h-4" />
+                <span className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  {selectedSubmission.userId}
+                </span>
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent className="flex-1 p-0">
+            {selectedSubmission ? (
+              <ScrollArea className="h-full px-6">
+                <div className="space-y-4 pb-6">
+                  <div className="relative pl-4 border-l-2 border-muted space-y-6">
+                    {selectedSubmission.events.map((event, index) => {
+                      const isExpanded = expandedEventId === index
+                      return (
+                        <div key={index} className="relative">
+                          <div className={`absolute -left-[21px] top-0 h-3 w-3 rounded-full border-2 border-background ${
+                            event.level === 'error' ? 'bg-red-500' : 
+                            event.level === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                          }`} />
+                          
+                          <div 
+                            className="group rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer overflow-hidden"
+                            onClick={() => toggleEventExpansion(index)}
+                          >
+                            <div className="p-3 flex items-start gap-3">
+                              <Badge variant="outline" className={`uppercase text-[10px] px-1.5 ${getLogLevelColor(event.level)}`}>
+                                {event.level}
+                              </Badge>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-sm font-medium leading-none">{event.msg}</p>
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap font-mono">
+                                    {event.timestamp}
+                                  </span>
+                                </div>
+                              </div>
+                              {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                            </div>
+
+                            {isExpanded && (
+                              <div className="px-3 pb-3 pt-0">
+                                <div className="bg-muted/50 rounded-md p-3 font-mono text-xs overflow-x-auto">
+                                  <pre>
+                                    {JSON.stringify(
+                                      {
+                                        ...Object.fromEntries(
+                                          Object.entries(event).filter(
+                                            ([key]) => key !== 'level' && key !== 'msg' && key !== 'timestamp'
+                                          )
+                                        )
+                                      },
+                                      null,
+                                      2
+                                    )}
+                                  </pre>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
+                <Terminal className="h-12 w-12 mb-4 opacity-20" />
+                <p>Select a submission from the list to view its detailed event logs</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
-  );
+  )
 }

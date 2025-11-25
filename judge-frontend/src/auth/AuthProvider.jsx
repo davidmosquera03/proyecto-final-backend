@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-
-// Hardcoded test users
-const USERS = [
-  { username: 'student', password: 'student123', role: 'student' },
-  { username: 'teacher', password: 'teacher123', role: 'teacher' },
-]
+import { authService } from '../services/api'
 
 const AuthContext = createContext(null)
 
@@ -12,39 +7,57 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Restaurar sesión desde localStorage al montar
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem('authUser')
+      const storedUser = authService.getStoredUser()
       if (storedUser) {
-        setUser(JSON.parse(storedUser))
+        setUser(storedUser)
       }
     } catch (err) {
-      console.error('Error restaurando sesión:', err)
+      console.error('Error restoring session:', err)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
-  function login(username, password) {
-    const found = USERS.find(
-      (u) => u.username === username && u.password === password,
-    )
-    if (found) {
-      const userData = { username: found.username, role: found.role }
+  async function login(email, password) {
+    try {
+      const data = await authService.login(email, password)
+      const userData = {
+        id: data.id,
+        email: data.email,
+        role: data.role,
+      }
       setUser(userData)
-      localStorage.setItem('authUser', JSON.stringify(userData))
-      return { ok: true }
+      return { ok: true, user: userData }
+    } catch (error) {
+      console.error('Login error:', error)
+      return { ok: false, message: error.message || 'Invalid credentials' }
     }
-    return { ok: false, message: 'Credenciales inválidas' }
+  }
+
+  async function register(email, password, role) {
+    try {
+      const data = await authService.register(email, password, role)
+      const userData = {
+        id: data.id,
+        email: data.email,
+        role: data.role,
+      }
+      setUser(userData)
+      return { ok: true, user: userData }
+    } catch (error) {
+      console.error('Register error:', error)
+      return { ok: false, message: error.message || 'Registration failed' }
+    }
   }
 
   function logout() {
+    authService.logout()
     setUser(null)
-    localStorage.removeItem('authUser')
   }
 
-  const value = { user, login, logout }
+  const value = { user, login, register, logout, isLoading }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

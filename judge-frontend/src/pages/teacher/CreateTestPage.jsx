@@ -9,7 +9,7 @@ export default function CreateTestPage() {
   return (
     <>
       <Header />
-      <div style={{ padding: 20 }}>
+      <div className="min-h-screen bg-background py-8">
         <CreateTest onClose={() => navigate('/teacher')} />
       </div>
     </>

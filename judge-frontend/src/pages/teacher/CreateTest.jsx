@@ -1,126 +1,255 @@
 import React, { useState, useEffect } from 'react'
+import { useCourses, useChallenges, useTestCases, useAIChallenge } from '../../hooks/useApi'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Button } from '../../components/ui/button'
+import { Label } from '../../components/ui/label'
+import { Textarea } from '../../components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select'
+import { Alert, AlertDescription } from '../../components/ui/alert'
+import { Wand2, Save, X } from 'lucide-react'
 
 export default function CreateTest({ onClose }) {
-  const [name, setName] = useState('Nueva Prueba')
-  const [description, setDescription] = useState('Descripción breve de la prueba')
+  const { courses } = useCourses()
+  const { createChallenge } = useChallenges()
+  const { createTestCase } = useTestCases()
+  const { generateIdea, generateTestCases, loading: aiLoading } = useAIChallenge()
 
-  const sampleChallenge = {
-    title: 'Two Sum',
-    difficulty: 'Easy',
-    tags: ['arrays', 'hashmap'],
-    timeLimit: 1500,
-    memoryLimit: 256,
-    description: 'Dado un arreglo de enteros y un target, encuentra dos índices cuyos valores sumen el target.'
-  }
-
-  const [challenges, setChallenges] = useState([sampleChallenge])
-  const [isDark, setIsDark] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [difficulty, setDifficulty] = useState('EASY')
+  const [tags, setTags] = useState('')
+  const [timeLimit, setTimeLimit] = useState(1500)
+  const [memoryLimit, setMemoryLimit] = useState(256)
+  const [courseId, setCourseId] = useState('')
+  const [aiCategory, setAiCategory] = useState('')
+  const [message, setMessage] = useState('')
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const apply = () => setIsDark(!!mq.matches)
-    apply()
-    // Listen for changes
-    if (mq.addEventListener) {
-      mq.addEventListener('change', apply)
-      return () => mq.removeEventListener('change', apply)
+    if (courses.length > 0 && !courseId) {
+      setCourseId(courses[0].id)
     }
-    // fallback for older browsers
-    if (mq.addListener) {
-      mq.addListener(apply)
-      return () => mq.removeListener(apply)
+  }, [courses, courseId])
+
+  const handleGenerateAI = async () => {
+    if (!aiCategory.trim()) {
+      setMessage('Please enter a category')
+      setIsError(true)
+      return
     }
-  }, [])
 
-  function addChallenge() {
-    setChallenges((c) => [...c, { ...sampleChallenge, title: `Nuevo reto ${c.length + 1}` }])
+    setMessage('Generating challenge with AI...')
+    setIsError(false)
+    const ideaResult = await generateIdea(aiCategory)
+
+    if (!ideaResult.ok) {
+      setMessage(`AI Error: ${ideaResult.error}`)
+      setIsError(true)
+      return
+    }
+
+    const idea = ideaResult.data
+    setTitle(idea.title)
+    setDescription(idea.description)
+    setDifficulty(idea.difficulty)
+    setTags(idea.tags.join(', '))
+    setTimeLimit(idea.timeLimit)
+    setMemoryLimit(idea.memoryLimit)
+    setMessage('AI challenge generated! Review and save.')
+    setIsError(false)
   }
 
-  function toggleOpen(idx) {
-    setChallenges((c) => c.map((ch, i) => ({ ...ch, _open: i === idx ? !ch._open : ch._open })))
-  }
+  const handleSave = async () => {
+    if (!title || !description || !courseId) {
+      setMessage('Please fill all required fields')
+      setIsError(true)
+      return
+    }
 
-  function handleSave() {
-    // No persistencia: sólo mostrar en consola el objeto de la prueba
-    console.log('Guardar prueba:', { name, description, challenges })
-    if (onClose) onClose()
-  }
+    setMessage('Creating challenge...')
+    setIsError(false)
 
-  const theme = {
-    rootBg: isDark ? '#0f1113' : '#fff',
-    panelBg: isDark ? '#0b0c0d' : '#fafafa',
-    cardBorder: isDark ? '#2a2a2a' : '#eee',
-    text: isDark ? '#e6e6e6' : '#111',
-    muted: isDark ? '#9b9b9b' : '#666',
-    inputBg: isDark ? '#2a2a2a' : '#fff',
-    inputText: isDark ? '#e6e6e6' : '#111',
-    buttonBg: isDark ? '#111' : '#111',
-    buttonText: '#fff',
-    boxShadow: isDark ? '0 6px 18px rgba(0,0,0,0.6)' : '0 6px 18px rgba(0,0,0,0.06)'
+    const challengeData = {
+      title,
+      description,
+      difficulty,
+      tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+      timeLimit: parseInt(timeLimit),
+      memoryLimit: parseInt(memoryLimit),
+      courseId,
+    }
+
+    const result = await createChallenge(challengeData)
+
+    if (result.ok) {
+      setMessage('Challenge created successfully!')
+      setIsError(false)
+      
+      const testCasesResult = await generateTestCases(challengeData)
+      if (testCasesResult.ok && testCasesResult.data.length > 0) {
+        for (const tc of testCasesResult.data) {
+          await createTestCase({
+            challengeId: result.data.id,
+            input: tc.input,
+            output: tc.output,
+            isHidden: tc.isHidden || false,
+          })
+        }
+        setMessage('Challenge and test cases created!')
+      }
+
+      setTimeout(() => {
+        if (onClose) onClose()
+      }, 2000)
+    } else {
+      setMessage(`Error: ${result.error}`)
+      setIsError(true)
+    }
   }
 
   return (
-    <div className="auth-container create-test-root" style={{ padding: 20, width: '1000px' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ color: theme.text }}>Crear Prueba</h3>
-      </header>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Create Challenge</h1>
+        {onClose && (
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
 
-      <section style={{ marginTop: 12 }}>
-        <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}><strong style={{ color: theme.text }}>Nombre</strong></label>
-        <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 6, boxSizing: 'border-box' }} />
+      {message && (
+        <Alert variant={isError ? "destructive" : "default"} className={`mb-6 ${!isError ? "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20" : ""}`}>
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
 
-        <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}><strong style={{ color: theme.text }}>Descripción</strong></label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} style={{ width: '100%', padding: 8, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 6, boxSizing: 'border-box' }} />
-      </section>
+      <div className="grid gap-6">
+        <Card className="border-primary/20 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-primary" />
+              AI Generator
+            </CardTitle>
+            <CardDescription>
+              Generate a challenge idea automatically using AI
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <Input
+                value={aiCategory}
+                onChange={e => setAiCategory(e.target.value)}
+                placeholder="Category (e.g., Binary Trees, Dynamic Programming)"
+                className="flex-1"
+              />
+              <Button onClick={handleGenerateAI} disabled={aiLoading}>
+                {aiLoading ? 'Generating...' : 'Generate with AI'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <section style={{ marginTop: 18 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h4 style={{ color: theme.text }}>Retos</h4>
-          <button onClick={addChallenge} style={{ background: theme.buttonBg, color: theme.buttonText, border: 'none', padding: '8px 12px', borderRadius: 8 }}>Añadir reto</button>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Challenge Details</CardTitle>
+            <CardDescription>Manually configure the challenge parameters</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Course</Label>
+              <Select value={courseId} onValueChange={setCourseId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map(course => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.name} ({course.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div style={{ marginTop: 10 }}>
-          {challenges.map((ch, idx) => (
-            <div key={idx} style={{ marginBottom: 8 }}>
-              <div className="test-card" style={{ cursor: 'pointer' }} onClick={() => toggleOpen(idx)}>
-                <div className="card-left">
-                  <div className="prueba-name" style={{ color: theme.text }}>{ch.title}</div>
-                  <div className="test-list" style={{ color: theme.muted }}>{ch.difficulty} · {ch.tags?.join(', ')}</div>
-                </div>
-                <div className="card-right" aria-hidden style={{ color: theme.muted }}>{ch._open ? '▾' : '▸'}</div>
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Challenge Title"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Detailed description of the problem..."
+                rows={6}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Difficulty</Label>
+                <Select value={difficulty} onValueChange={setDifficulty}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EASY">Easy</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HARD">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              {ch._open && (
-                <div className="card-details" style={{ padding: 16, marginTop: 6, background: theme.panelBg, border: `1px solid ${theme.cardBorder}`, borderRadius: 8 }} onClick={(e) => e.stopPropagation()}>
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Título</label>
-                  <input defaultValue={ch.title} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Dificultad</label>
-                  <input defaultValue={ch.difficulty} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Tags (coma separadas)</label>
-                  <input defaultValue={ch.tags?.join(', ')} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Time Limit (ms)</label>
-                  <input defaultValue={ch.timeLimit} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Memory Limit (MB)</label>
-                  <input defaultValue={ch.memoryLimit} style={{ width: '100%', padding: 8, marginBottom: 12, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-
-                  <label style={{ display: 'block', marginBottom: 8, color: theme.muted }}>Descripción</label>
-                  <textarea defaultValue={ch.description} rows={3} style={{ width: '100%', padding: 8, background: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.cardBorder}`, borderRadius: 4, boxSizing: 'border-box' }} />
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <Input
+                  value={tags}
+                  onChange={e => setTags(e.target.value)}
+                  placeholder="arrays, hashmap, sorting (comma separated)"
+                />
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      <footer style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-        <button onClick={handleSave} style={{ padding: '8px 14px', background: theme.buttonBg, color: theme.buttonText, border: 'none', borderRadius: 8 }}>Guardar prueba</button>
-        <button onClick={onClose} style={{ padding: '8px 14px', background: 'transparent', color: theme.muted, border: `1px solid ${theme.cardBorder}`, borderRadius: 8 }}>Cancelar</button>
-      </footer>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Time Limit (ms)</Label>
+                <Input
+                  type="number"
+                  value={timeLimit}
+                  onChange={e => setTimeLimit(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Memory Limit (MB)</Label>
+                <Input
+                  type="number"
+                  value={memoryLimit}
+                  onChange={e => setMemoryLimit(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-4">
+          {onClose && (
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          )}
+          <Button onClick={handleSave} className="min-w-[150px]">
+            <Save className="mr-2 h-4 w-4" />
+            Save Challenge
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
