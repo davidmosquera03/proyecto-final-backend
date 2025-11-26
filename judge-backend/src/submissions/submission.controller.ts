@@ -24,6 +24,6 @@ export class SubmissionController {
     if (userId) {
       return this.submissionService.getSubmissionsByUser(userId);
     }
-    return { message: 'Proporciona userId como query parameter' };
+    return this.submissionService.getAllSubmissions();
   }
 }
