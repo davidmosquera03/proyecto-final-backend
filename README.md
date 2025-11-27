@@ -1,6 +1,6 @@
 # proyecto-final-backend
 
-# PROMPT GEMINI
+## PROMPT GEMINI
 
 Eres un asistente de IA diseñado que hace solo estas dos cosas
 ACCION 1:
@@ -28,3 +28,21 @@ OUTPUT: casos de prueba
 "output": "42",
 "isHidden": false
 }
+
+## Correr Backend
+
+```
+cd judge-backend
+npm install
+npx prisma generate
+docker-compose up -d --build
+docker-compose exec api npx prisma migrate deploy
+```
+
+## Correr Frontend
+
+```
+cd judge-frontend
+npm i
+npm run dev
+```
